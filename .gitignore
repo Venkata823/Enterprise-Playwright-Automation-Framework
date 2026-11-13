@@ -1,22 +1,48 @@
-# Dependencies
+# .gitignore lists files and folders that Git must NOT track or push.
+# Rule of thumb: ignore anything that is generated, downloaded, or secret.
+# A leading "/" means "only at the project root".
+
+# Installed npm packages. Anyone can re-create them with "npm install".
 node_modules/
 
-# Playwright output
+# ---------- Playwright output (re-created on every run) ----------
+
+# Traces, screenshots and videos of failed tests.
 /test-results/
+
+# The HTML report.
 /playwright-report/
+
+# Report pieces from sharded CI runs, merged later into one report.
 /blob-report/
+
+# Playwright's own cache.
 /playwright/.cache/
+
+# Saved login sessions (cookies and tokens). These are secrets.
 /playwright/.auth/
 
-# Other reports
+# ---------- Other reports ----------
+
+# Raw data and HTML report from the Allure reporter.
 /allure-results/
 /allure-report/
+
+# Any custom report output.
 /custom-report/
 /reports/
 
-# Secrets and environment files (never commit these)
+# ---------- Secrets and environment files (never commit these) ----------
+
+# Ignore every file or folder whose name starts with ".env"
+# (for example .env, .env.qa, .env.stage). They hold URLs and passwords.
 .env*
+
+# "!" means "do NOT ignore this one". The example file has keys only,
+# no real values, so it is safe and useful to commit.
 !.env.example
 
-# Practice code, not part of the framework
+# ---------- Not part of the framework ----------
+
+# Old practice folder.
 /Typescript/

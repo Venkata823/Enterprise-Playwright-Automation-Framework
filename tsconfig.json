@@ -1,23 +1,68 @@
 {
+  // tsconfig.json tells TypeScript HOW to check the code in this project.
+  // Playwright runs the .ts files itself; TypeScript is used here only as a checker.
   "compilerOptions": {
+    // ---------- Language and modules ----------
+
+    // Which JavaScript version the code is written for. ES2022 supports
+    // modern features such as async/await and class fields.
     "target": "ES2022",
+
+    // Use modern "import ... from ..." module syntax.
     "module": "ESNext",
+
+    // How TypeScript finds imported files. "Bundler" allows imports without
+    // file extensions and supports the "paths" aliases below.
     "moduleResolution": "Bundler",
+
+    // Load Node.js type definitions, so names like "process" and "__dirname"
+    // are known. They come from the @types/node package.
     "types": ["node"],
 
+    // ---------- Strictness (catch mistakes while writing) ----------
+
+    // Master switch: turns on all main strict checks, for example
+    // "this value may be null" and "this variable has no type".
     "strict": true,
+
+    // Error if a local variable is declared but never used.
     "noUnusedLocals": true,
+
+    // Error if a function parameter is never used.
     "noUnusedParameters": true,
+
+    // Error if some paths of a function return a value and others do not.
     "noImplicitReturns": true,
+
+    // A child class must write "override" when it replaces a parent method.
+    // This protects page objects that extend a BasePage.
     "noImplicitOverride": true,
+
+    // Error if a "case" in a switch falls into the next case without "break".
     "noFallthroughCasesInSwitch": true,
+
+    // Reading array[i] or object[key] gives "value or undefined", so you
+    // must handle the missing case. Very useful for test data.
     "noUncheckedIndexedAccess": true,
 
+    // ---------- Convenience ----------
+
+    // Allows "import x from 'package'" for older CommonJS packages.
     "esModuleInterop": true,
+
+    // Allows importing .json files (for example test data) with full types.
     "resolveJsonModule": true,
+
+    // Do not type-check files inside node_modules. Makes checking faster.
     "skipLibCheck": true,
+
+    // Do not create .js output files. We only check; Playwright runs the code.
     "noEmit": true,
 
+    // ---------- Import aliases ----------
+    // Short names for folders, so imports do not need "../../..".
+    // Example: import { LoginPage } from '@pages/LoginPage';
+    // Playwright reads these aliases too, so they work when tests run.
     "paths": {
       "@config/*": ["./config/*"],
       "@pages/*": ["./pages/*"],
@@ -29,6 +74,9 @@
       "@app-types/*": ["./types/*"]
     }
   },
+
+  // Which files and folders TypeScript checks. Anything not listed here
+  // (reports, node_modules) is ignored.
   "include": [
     "playwright.config.ts",
     "config",

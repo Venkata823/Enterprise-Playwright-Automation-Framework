@@ -1,5 +1,12 @@
+# .prettierignore lists files and folders that Prettier must NOT format.
+
+# Installed packages: not our code.
 node_modules
+
+# Written by npm itself. Formatting it would create noisy changes.
 package-lock.json
+
+# Generated reports and test output: no need to format.
 playwright-report
 test-results
 blob-report
@@ -7,4 +14,6 @@ allure-results
 allure-report
 custom-report
 reports
+
+# Old practice folder.
 Typescript

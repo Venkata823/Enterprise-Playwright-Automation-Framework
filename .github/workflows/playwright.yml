@@ -1,35 +1,62 @@
+# This file is the CI pipeline. GitHub Actions runs every .yml file
+# in the .github/workflows folder automatically.
+
+# Name shown in the Actions tab on GitHub.
 name: Playwright Tests
+
+# WHEN the pipeline starts.
 on:
+  # On every push to main (or master).
   push:
     branches: [main, master]
+  # On every pull request that targets main (or master).
   pull_request:
     branches: [main, master]
+
+# WHAT the pipeline does. Jobs run on separate machines.
 jobs:
+  # ---------- JOB 1: code quality gate ----------
+  # "quality" is the internal id, used by "needs" below.
   quality:
+    # Name shown on GitHub.
     name: Typecheck and lint
+    # Stop the job if it runs longer than 10 minutes.
     timeout-minutes: 10
+    # Use a fresh GitHub-hosted Linux machine (the "runner").
     runs-on: ubuntu-latest
     steps:
+      # Download the repository code onto the runner.
       - uses: actions/checkout@v4
+      # Install Node.js.
       - uses: actions/setup-node@v4
         with:
+          # Use the latest long-term-support version.
           node-version: lts/*
+          # Reuse downloaded npm packages between runs to save time.
           cache: npm
+      # Clean install, exactly from package-lock.json.
       - name: Install dependencies
         run: npm ci
+      # Fail on any TypeScript type error.
       - name: Typecheck
         run: npm run typecheck
+      # Fail on any lint error, such as a missing "await".
       - name: Lint
         run: npm run lint
+      # Fail if any file is not formatted with Prettier.
       - name: Format check
         run: npm run format:check
 
+  # ---------- JOB 2: run the tests ----------
   test:
     name: Playwright tests
+    # Run only if JOB 1 passed. This is the quality gate.
     needs: quality
+    # Stop the job if it runs longer than 60 minutes.
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
+      # Each job starts on a new machine, so download the code again.
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -37,13 +64,21 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
+      # Download the browsers and the Linux libraries they need.
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
+      # Run all tests. GitHub sets CI=true, so playwright.config.ts
+      # uses 2 retries and 1 worker here.
       - name: Run Playwright tests
         run: npx playwright test
+      # Save the HTML report so it can be downloaded from the run page.
       - uses: actions/upload-artifact@v4
+        # Upload even when tests failed, but not when the run was cancelled.
         if: ${{ !cancelled() }}
         with:
+          # Name of the download on GitHub.
           name: playwright-report
+          # Folder to upload.
           path: playwright-report/
+          # Keep the report for 30 days.
           retention-days: 30

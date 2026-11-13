@@ -31,12 +31,12 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    //launchOptions : { args: ['--start-maximized'],},
+    launchOptions: { args: ['--start-maximized'] },
     //iewport: null,
-    viewport: {
-      width: 3840,
-      height: 2160,
-    },
+    /*viewport: {
+        width: 3840,
+        height: 2160,
+    },*/
   },
 
   /* Configure projects for major browsers */

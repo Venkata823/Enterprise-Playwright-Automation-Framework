@@ -1,1 +1,10 @@
+# .gitattributes tells Git how to treat files.
+#
+#   *          apply to every file
+#   text=auto  let Git detect which files are text
+#   eol=lf     store and check out text files with Linux line endings (LF)
+#
+# Why: Windows uses CRLF line endings and Linux/macOS use LF. Without this
+# rule, the same file can look "changed" on different machines, and the
+# Prettier format check can fail on CI.
 * text=auto eol=lf
