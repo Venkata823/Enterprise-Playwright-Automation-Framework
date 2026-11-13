@@ -25,19 +25,22 @@ npx playwright install
 
 ## Folder structure
 
-| Folder       | Holds                                              |
-| ------------ | -------------------------------------------------- |
-| `tests/web`  | UI tests                                           |
-| `tests/api`  | API tests                                          |
-| `tests/db`   | Database tests                                     |
-| `pages`      | Page objects (locators and actions, no assertions) |
-| `components` | Shared UI parts (header, menus, tables)            |
-| `api`        | API clients (`endpoints`) and response `schemas`   |
-| `fixtures`   | Custom Playwright fixtures                         |
-| `testdata`   | Test data files and data builders                  |
-| `utils`      | Helpers, logger, environment config                |
-| `types`      | Shared TypeScript types                            |
-| `prompts`    | Prompts and rules for AI coding tools              |
+| Folder         | Holds                                              |
+| -------------- | -------------------------------------------------- |
+| `tests/web`    | UI tests                                           |
+| `tests/api`    | API tests                                          |
+| `tests/db`     | Database tests                                     |
+| `tests/e2e`    | Full business flows across UI and API              |
+| `tests/visual` | Screenshot comparison tests                        |
+| `config`       | Environment settings loader                        |
+| `pages`        | Page objects (locators and actions, no assertions) |
+| `components`   | Shared UI parts (header, menus, tables)            |
+| `api`          | API clients (`endpoints`) and response `schemas`   |
+| `fixtures`     | Custom Playwright fixtures                         |
+| `testdata`     | Test data files and data builders                  |
+| `utils`        | Helpers and logger                                 |
+| `types`        | Shared TypeScript types                            |
+| `prompts`      | Prompts and rules for AI coding tools              |
 
 ## Import aliases
 
