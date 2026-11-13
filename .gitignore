@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Playwright output
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# Other reports
+/allure-results/
+/allure-report/
+/custom-report/
+/reports/
+
+# Secrets and environment files (never commit these)
+.env*
+!.env.example
+
+# Practice code, not part of the framework
+/Typescript/

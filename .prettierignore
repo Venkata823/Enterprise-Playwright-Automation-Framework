@@ -1,0 +1,10 @@
+node_modules
+package-lock.json
+playwright-report
+test-results
+blob-report
+allure-results
+allure-report
+custom-report
+reports
+Typescript
