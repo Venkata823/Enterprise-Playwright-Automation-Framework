@@ -438,6 +438,95 @@ A new team member copies `.env.example` (committed, keys only) to
 `.env.qa` and fills in the values. The CI pipeline gets the values from
 its secret store, so it needs no env file.
 
+#### What an env file is and what it holds
+
+`.env.qa` is a plain text file. Each line is `NAME=value`. It holds only
+the values that differ from one environment to another.
+
+| Goes in an env file           | Does not go in an env file                                 |
+| ----------------------------- | ---------------------------------------------------------- |
+| Application and API addresses | Timeouts, retries, browsers (`playwright.config.ts`)       |
+| Test user names and passwords | Code or logic (`config/env.ts`)                            |
+| Database connection details   | Test data such as customer names and amounts (`testdata/`) |
+| Keys and tokens               | Locators (`pages/`)                                        |
+
+Simple test: "Would this value be different on QA and on stage?" If yes,
+it belongs in the env file. If no, it belongs somewhere else.
+
+#### Why one file per environment, not one file for all
+
+Every env file has the same names with different values:
+
+```
+# .env.qa
+BASE_URL=https://qa.bank.example/
+
+# .env.stage
+BASE_URL=https://stage.bank.example/
+```
+
+The code always reads `BASE_URL`. Only the file that is loaded changes:
+`npm run test:qa` loads `.env.qa`, `npm run test:stage` loads `.env.stage`.
+
+A single file for all environments is possible (`QA_BASE_URL`,
+`STAGE_BASE_URL`, `PROD_BASE_URL`, and so on), but it is avoided:
+
+| Reason                     | One file for all environments                               | One file per environment                            |
+| -------------------------- | ----------------------------------------------------------- | --------------------------------------------------- |
+| Least privilege            | Anyone who tests QA also holds stage and production secrets | Each person gets only the file they need            |
+| Wrong-environment mistakes | One wrong prefix can send QA tests to production            | You choose a whole environment at once              |
+| Simple code                | Code must build names such as `QA_` + `BASE_URL`            | Code reads `BASE_URL`, always                       |
+| New environment            | Edit the shared file and the code                           | Add one file. No code change                        |
+| Pipeline                   | Every run carries every environment's secrets               | Each run receives only its own environment's values |
+| Audit                      | Hard to show who can reach production secrets               | Access is given and recorded per environment        |
+| Leak                       | One leaked file exposes every environment                   | One leaked file exposes one environment             |
+
+#### The twelve-factor approach
+
+The Twelve-Factor App is a well-known set of twelve rules for building
+software that is easy to run in many environments. Most companies follow
+it. Factor three is about configuration, and this framework follows it.
+
+| What the rule says                                        | How this framework does it                                         |
+| --------------------------------------------------------- | ------------------------------------------------------------------ |
+| Config is anything that changes between environments      | URLs, users, passwords, database details                           |
+| Keep config strictly separate from code                   | Values are in env files; code is in `config/env.ts`                |
+| Supply config through the environment the program runs in | `dotenv` loads the file into `process.env`; CI sets the variables  |
+| Do not group settings into named sets inside the code     | No `if (env === 'qa')` blocks; the same names work everywhere      |
+| The code could be made public without leaking any secret  | The repository holds only `.env.example`, with names and no values |
+
+The last row is a quick check you can apply to any project: if the
+repository were made public today, would any password be exposed? Here
+the answer is no.
+
+#### Who can see which environment
+
+An env file is plain text and has no lock of its own. Access is controlled
+by who is given the values:
+
+| Control                   | How it works                                                                  |
+| ------------------------- | ----------------------------------------------------------------------------- |
+| Not in Git                | `.gitignore` blocks env files, so cloning the repository gives no secrets     |
+| Secret manager            | Values are stored in a tool that grants access per person and per environment |
+| Protected CI environments | Each pipeline environment has its own secrets and its own approval rules      |
+| Separate accounts         | A QA engineer gets a QA test user only                                        |
+
+Separate files make this possible. One environment can be handed over
+without the others.
+
+Where the values come from:
+
+| Where the tests run | Source of the values                               |
+| ------------------- | -------------------------------------------------- |
+| Your computer       | A local env file such as `.env.qa`                 |
+| CI pipeline         | The pipeline's variables and secrets (Phase 8)     |
+| Large companies     | A secret manager, read locally and by the pipeline |
+
+One accepted variation: some teams keep non-secret settings (for example
+public URLs) for all environments in one committed file, and separate only
+the secrets. The firm rule is about secrets: always per environment, never
+committed.
+
 ### `utils/`
 
 |                  |                                                                        |
@@ -595,18 +684,19 @@ These are not written by you and are not pushed to GitHub (except `.git` itself,
 
 ## Common doubts
 
-| Doubt                           | Answer                                                                                                |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `config/` or `.env` files?      | `config/` is code and is committed. `.env.qa` holds values and secrets and is not committed.          |
-| `pages/` or `components/`?      | A page is a full screen. A component is a part used on many screens.                                  |
-| `fixtures/` or `utils/`?        | A fixture sets up and cleans up for a test. A util is a plain helper function.                        |
-| `types/` or `testdata/`?        | A type is the shape of the data. Test data is the actual values.                                      |
-| `types/` or `api/schemas/`?     | A type is checked while writing code. A schema is checked at run time against the real response.      |
-| `tests/web` or `tests/e2e`?     | `web` tests one page or feature. `e2e` tests a full business flow across pages, often with API setup. |
-| Where do locators go?           | Only in `pages/` and `components/`.                                                                   |
-| Where do assertions go?         | Only in `tests/`.                                                                                     |
-| Where do URLs and passwords go? | In env files, read through `config/`. Never in code.                                                  |
-| Where does login setup go?      | In `fixtures/`, so tests start already logged in.                                                     |
+| Doubt                                | Answer                                                                                                             |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `config/` or `.env` files?           | `config/` is code and is committed. `.env.qa` holds values and secrets and is not committed.                       |
+| One env file or one per environment? | One per environment, with the same names. It limits who holds which secrets and avoids wrong-environment mistakes. |
+| `pages/` or `components/`?           | A page is a full screen. A component is a part used on many screens.                                               |
+| `fixtures/` or `utils/`?             | A fixture sets up and cleans up for a test. A util is a plain helper function.                                     |
+| `types/` or `testdata/`?             | A type is the shape of the data. Test data is the actual values.                                                   |
+| `types/` or `api/schemas/`?          | A type is checked while writing code. A schema is checked at run time against the real response.                   |
+| `tests/web` or `tests/e2e`?          | `web` tests one page or feature. `e2e` tests a full business flow across pages, often with API setup.              |
+| Where do locators go?                | Only in `pages/` and `components/`.                                                                                |
+| Where do assertions go?              | Only in `tests/`.                                                                                                  |
+| Where do URLs and passwords go?      | In env files, read through `config/`. Never in code.                                                               |
+| Where does login setup go?           | In `fixtures/`, so tests start already logged in.                                                                  |
 
 ## Rules that keep the structure clean
 
