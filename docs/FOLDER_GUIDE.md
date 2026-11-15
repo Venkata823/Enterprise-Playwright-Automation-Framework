@@ -161,6 +161,10 @@ test('transfer moves money between two accounts @smoke', async ({ transferFundsP
 What you do NOT see in a test: `page.locator('#amount')`, a URL, a user
 name, or a password. Those live in lower layers.
 
+Note: the account numbers are typed in here only to keep the example short.
+In the real framework, a fixture creates the two accounts and passes them
+to the test, so every test has its own data.
+
 ## Application layers
 
 ### `pages/`
@@ -276,9 +280,10 @@ export class AccountsClient {
 }
 ```
 
-```jsonc
-// api/schemas/account.schema.json
-// Describes the response shape. A missing or renamed field fails the check.
+`api/schemas/account.schema.json` describes the response shape. A missing
+or renamed field fails the check. (A real `.json` file cannot hold comments.)
+
+```json
 {
   "type": "object",
   "required": ["id", "customerId", "type", "balance"],
@@ -286,8 +291,8 @@ export class AccountsClient {
     "id": { "type": "number" },
     "customerId": { "type": "number" },
     "type": { "type": "string" },
-    "balance": { "type": "number" },
-  },
+    "balance": { "type": "number" }
+  }
 }
 ```
 
